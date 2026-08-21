@@ -67,7 +67,7 @@ df["fico_band"] = pd.cut(
 
 df["dti_band"] = pd.cut(
     df["dti_n"],
-    bins=[-np.inf, 8, 18, 25, 30, np.inf],
+    bins=[-np.inf, 10, 20, 30, 40, np.inf],
     labels=["Very Low", "Low", "Moderate", "High", "Very High"],
 )
 
