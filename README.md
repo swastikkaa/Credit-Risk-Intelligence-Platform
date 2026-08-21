@@ -1,73 +1,153 @@
 # Credit Risk Intelligence Platform
 
-Turning 1.35M+ loan records into decision-useful credit risk intelligence — from SQL-based portfolio analytics through a scored ML model to a financial-impact dashboard.
+An end-to-end credit risk analytics platform combining **SQL, machine learning, research-driven experimentation, and financial impact modelling** to evaluate loan default risk and translate predictions into lending decisions.
 
-🔗 **[Live Tableau Dashboard](https://public.tableau.com/app/profile/swastika.singh/viz/CreditRiskIntelligenceplatform/Dashboard1)**
+## 🔗 Interactive Dashboard
 
-![Financial Impact Dashboard]<img width="1140" height="772" alt="image" src="https://github.com/user-attachments/assets/5e7f85e0-1fb2-43f8-b081-7c7e1054551d" />
+**[View the Credit Risk Intelligence Platform on Tableau Public](https://public.tableau.com/views/CreditRiskIntelligenceplatform/Dashboard1?:language=en-GB&:sid=&:display_count=n&:origin=viz_share_link)**
 
+---
 
-## Why this project
+## 📌 Project Overview
 
-Inspired by *[Credit Meets LLM: Building a Risk Indicator from Loan Descriptions in P2P Lending]([Reasearch paper.pdf](https://github.com/user-attachments/files/31297804/Reasearch.paper.pdf)
-)*, which explores whether unstructured loan-description text carries default signal beyond hard credit variables. I used it as a starting question rather than a blueprint — the pipeline here is SQL-driven EDA + a structured-feature XGBoost model, with the paper's premise tested (not assumed) as a side experiment. See [Findings](#key-findings) below for what that test actually showed.
+I analyzed a portfolio of **1.35M loans** to investigate where default risk is concentrated, build a predictive default model, and quantify the financial impact of risk-based lending decisions.
 
-## Project structure
-├── sql/ # Portfolio EDA & risk segmentation queries
-├── notebooks/
-│ └── crip_ML.ipynb # Modeling pipeline: preprocessing, XGBoost, threshold tuning, text experiment
-├── docs/
-│ └── Credit_Risk_Intelligence_SQL_Findings.docx
+The project follows three stages:
+
+**Portfolio Intelligence → Predictive Modelling → Financial Impact**
+
+### 1. Portfolio Risk Analysis
+
+I used SQL-based exploratory analysis to identify the strongest risk patterns across borrower and loan characteristics.
+
+The key finding was the interaction between **FICO score and Debt-to-Income ratio (DTI)**. Default rates ranged from **5.81% to 39.44%** across the FICO × DTI segments, revealing a substantially sharper risk gradient than either variable alone.
+
+### 2. Machine Learning
+
+I built an **XGBoost binary classification model** to predict loan default using application-time borrower and loan characteristics.
+
+The final model achieved:
+
+| Metric | Result |
+|---|---:|
+| ROC-AUC | **0.682** |
+| Recall | **0.645** |
+| F1 Score | **0.406** |
+| Baseline Default Rate | **19.98%** |
+
+I selected the operating threshold based on the financial consequences of lending decisions rather than optimising a single classification metric.
+
+### 3. Financial Impact
+
+I translated model predictions into portfolio-level financial outcomes.
+
+| Financial Metric | Result |
+|---|---:|
+| Default Loss Saved | **$413.9M** |
+| Opportunity Cost | **$135.6M** |
+| Net Dollar Savings | **$278.2M** |
+| Portfolio Loss Reduction | **47.41%** |
+
+---
+
+## 🔬 Research-Inspired Experiment
+
+Inspired by *Credit Meets LLM: Building a Risk Indicator from Loan Descriptions in P2P Lending*, I tested whether unstructured loan descriptions carried standalone default signal on this dataset.
+
+A **TF-IDF + Logistic Regression** text-only model achieved **0.58 ROC-AUC**, below the **0.68 ROC-AUC** achieved using structured borrower and loan features alone.
+
+This suggests that hard credit variables such as **FICO, DTI and loan characteristics** dominate the predictive signal in this dataset, while text may still be worth testing as an additional feature source.
+
+---
+
+## 🧠 SQL → ML Connection
+
+The SQL EDA directly informed the machine learning workflow.
+
+I tested a **train-only target-encoded FICO × DTI risk feature** derived from the SQL risk segmentation analysis. Adding the feature produced no measurable improvement in ROC-AUC or F1, suggesting that the tree-based model was already recovering the interaction through its splits.
+
+The experiment was still useful from an **interpretability and governance** perspective because it provided an auditable connection between the SQL analysis and model features.
+
+---
+
+## 🛠️ Tech Stack
+
+**Languages & Analysis**
+- Python
+- SQL
+
+**Machine Learning**
+- XGBoost
+- scikit-learn
+- TF-IDF
+- Logistic Regression
+
+**Data**
+- pandas
+- NumPy
+
+**Visualisation & BI**
+- Tableau Public
+- Matplotlib
+
+---
+
+## 📁 Repository Structure
+
+Credit-Risk-Intelligence-Platform/
+│
+├── SQL/
+│   ├── 01_setup.sql
+│   ├── 02_portfolio_eda.sql
+│   └── 03_risk_segmentation.sql
+│
+├── ML/
+│   ├── credit_risk_ml_pipeline.ipynb
+│   └── credit_risk_ml_pipeline.py
+│
+├── Documentation/
+│   └── SQL_Findings.docx
+│
+├── Tableau/
+│   └── README.md
+│
+├── requirements.txt
 └── README.md
 
-## Data
+📊 Dashboard
 
-1.35M+ loan records, $19.42B total exposure.
+The Tableau dashboard presents the analysis as a connected story:
 
-## Pipeline
+01 — Financial Impact
+What is the financial value of identifying risky loans?
+<img width="1120" height="759" alt="image" src="https://github.com/user-attachments/assets/d92ef082-c6e1-4125-9f77-23f89b958c6c" />
 
-**1. SQL — Portfolio EDA & Risk Segmentation**
-Queried the loan portfolio to establish baseline risk and find the strongest risk-differentiating variable combination.
 
-**2. Feature Engineering**
-Built a train-only target-encoded FICO×DTI risk feature based on the SQL finding, plus a standard preprocessing pipeline (imputation, scaling, one-hot encoding).
+02 — Portfolio Risk Segmentation
+Where is default risk concentrated?
+<img width="1096" height="792" alt="image" src="https://github.com/user-attachments/assets/411b4d03-aecf-496c-a3b6-47f77962ac08" />
 
-**3. Modeling — XGBoost**
-Binary default classifier with `scale_pos_weight=4.0` to handle class imbalance (19.98% base rate). Threshold tuned against the loan portfolio's actual loss economics rather than default 0.5 cutoff assumptions — see Findings.
 
-**4. Financial Impact Translation**
-Converted model outputs into dollar terms (savings, opportunity cost, portfolio loss reduction) for a business-facing dashboard.
+03 — ML Diagnostics
+Can that risk be predicted and converted into a lending decision?
+<img width="1120" height="801" alt="image" src="https://github.com/user-attachments/assets/e88eeac3-5177-43df-812c-3ca9a8b93ca7" />
 
-**5. Dashboard — Tableau Public**
-Three-part story: portfolio risk segmentation → model diagnostics → financial impact.
 
-## Key Findings
+## ➡️Model Performance
+Metric	Score
+ROC-AUC	0.682
+Recall	0.645
+F1	0.406
+Precision	0.296
 
-**Portfolio risk segmentation (SQL EDA)**
-FICO × DTI is the strongest risk-differentiating combination in the dataset — default rates span **5.81%** (Excellent FICO + Low DTI) to **39.44%** (Fair FICO + Very High DTI), against a 19.98% baseline. Notably, the highest-risk segment is only 0.08% of total portfolio exposure, while the largest concentration of capital (54.52%, $10.58B) sits in Good FICO + Low/Moderate DTI — a moderate-risk, high-volume zone that matters more for total dollar exposure than the extreme-risk tail does.
+### ➡️Model interpretation
 
-**Model performance**
-XGBoost — Precision 0.296, Recall 0.645, F1 0.406, ROC-AUC 0.682 — using only application-time features (no bureau trade-line history, no post-origination behavior). Threshold set at 0.5 rather than a higher-precision cutoff: at 0.80 threshold, precision rises to 0.57 but recall collapses to 0.02. Given LGD (70%) is ~7x the interest margin (10%) on a performing loan, missing a default is far more costly than over-declining — so the threshold was chosen to maximize dollar impact, not headline accuracy metrics.
+I evaluated the model based on its usefulness for lending decisions, not on a single headline metric. The model uses application-time features including FICO, DTI, loan amount, purpose, employment length, home ownership and geography. The resulting 0.682 ROC-AUC provides meaningful risk separation, consistent with the 5.81%–39.44% default-rate range identified in my FICO × DTI segmentation analysis.
 
-**Financial impact**
-At the chosen threshold: **$413.9M in default losses avoided**, **$135.6M in opportunity cost** (interest missed from declined applicants who wouldn't have defaulted), netting **$278.2M in savings** and a **47.41% reduction in portfolio loss** on the test set.
+### ➡️Threshold selection
 
-**Did the SQL-derived feature actually help the model?**
-Tested XGBoost with and without the SQL-derived FICO×DTI target-encoded feature — **no measurable difference in ROC-AUC or F1.** Tree-based models recover this interaction natively through splits, making the engineered feature redundant for predictive lift. Its actual value was **interpretability and governance** — an auditable, SQL-traceable justification for the interaction, independent of what the model's internal splits were doing. This is a genuinely useful distinction for regulated lending contexts, where explainability often matters as much as raw performance.
+Precision at 0.296 reflects a deliberate threshold choice rather than a standalone model objective. My threshold sweep showed that increasing the cutoff to 0.80 raised precision to 0.57 but reduced recall to 0.02. I therefore selected 0.5, where recall is 0.645, because it produced the strongest financial outcome — $278M in net portfolio savings on the test set.
 
-**Does loan-description text add standalone signal?**
-Tested a TF-IDF + Logistic Regression model on loan description text alone: **ROC-AUC 0.58**, notably below the 0.68 from structured features. On this dataset, hard credit variables (FICO, DTI, loan terms) dominate; text may still add marginal value *combined* with structured features, but doesn't stand on its own as a primary signal here — a more modest result than the inspiring paper's core premise, and worth noting as a real (not assumed) finding.
+###➡️Class imbalance
 
-## Stack
-
-Python — pandas, scikit-learn (imputation, scaling, one-hot encoding pipeline), XGBoost, TF-IDF/Logistic Regression (text experiment) · SQL · Tableau Public
-
-## Limitations & Next Steps
-
-- Compare `scale_pos_weight` vs. SMOTE resampling for imbalance handling
-- Test a combined text + structured feature model
-- No bureau/trade-line or macro data available — future work if extended
-
-## Author
-
-Swastika Singh — Linkden[https://www.linkedin.com/in/swastika-singh-77303a33a/] 
+With a 19.98% default rate, I used XGBoost's scale_pos_weight=4.0 to account for class imbalance rather than using synthetic resampling such as SMOTE.
